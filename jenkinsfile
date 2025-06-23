@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'jefrinpeter/jefrindockerimage'
+    }
+
+    stages {
+        stage('Pull Code From GitHub') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Jeffy287/k8s-deployment_1.git'
+            }
+        }
+
+        stage('Build the Docker Image') {
+            steps {
+                script {
+                    sh "sudo docker build -t jefrindockerimage ."
+                    sh "sudo docker tag jefrindockerimage ${IMAGE_NAME}:latest"
+                    sh "sudo docker tag jefrindockerimage ${IMAGE_NAME}:${BUILD_NUMBER}"
+                }
+            }
+        }
+
+        stage('Push the Docker Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'echo "$DOCKER_PASS" | sudo docker login -u "$DOCKER_USER" --password-stdin'
+                    }
+                    sh "sudo docker push ${IMAGE_NAME}:latest"
+                    sh "sudo docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh 'sudo kubectl apply -f pod.yaml'
+                    sh 'sudo kubectl rollout restart deployment loadbalancer-pod || true'
+                }
+            }
+        }
+    }
+}
