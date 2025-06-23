@@ -2,22 +2,22 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'jefrinpeter/jefrindockerimage'
+        IMAGE_NAME = 'arunkhrishna/arundockerimage'
     }
 
     stages {
         stage('Pull Code From GitHub') {
             steps {
-                git branch: 'main', url: 'https://github.com/Jeffy287/k8s-deployment_1.git'
+                git branch: 'main', url: 'https://github.com/ArunKhrishna/kopsdeploymentv.git'
             }
         }
 
         stage('Build the Docker Image') {
             steps {
                 script {
-                    sh "sudo docker build -t jefrindockerimage ."
-                    sh "sudo docker tag jefrindockerimage ${IMAGE_NAME}:latest"
-                    sh "sudo docker tag jefrindockerimage ${IMAGE_NAME}:${BUILD_NUMBER}"
+                    sh "sudo docker build -t arundockerimage ."
+                    sh "sudo docker tag arundockerimage ${IMAGE_NAME}:latest"
+                    sh "sudo docker tag arundockerimage ${IMAGE_NAME}:${BUILD_NUMBER}"
                 }
             }
         }
